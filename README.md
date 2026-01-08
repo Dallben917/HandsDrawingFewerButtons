@@ -39,6 +39,8 @@ Pinching in and out and scrolling directly over the image can only occur during 
 When in the drawing mode, attempting to pinch over the image will result in drawn shapes over the image.
 When zooming out is desired during the Drawing mode, the user needs to double-tap the floating "Reset" button or pinch over a non-image section of the screen.Pinching in and out can also occur directly over the alphanumeric input section above the image.
 
+Author: James Lenk, PT
+
 Supporting Research for the application of Cutaneous Functional Unit theory as follows:
 
 Ingrid Parry, Daniel Tancredi, Janice Bell, 3 Cutaneous Functional Unit (CFUs) Burn Features Associated with Motion Loss at Hospital Discharge, Journal of Burn Care & Research, Volume 46, Issue Supplement_1, March/April 2025, Page S2, https://doi.org/10.1093/jbcr/iraf019.003
