@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Hands Overlay with 9 Patterns + Selection</title>
+<title>Hands Overlay with 11 Patterns + Selection</title>
 <style>
 /* ============================
    TOP FORM HEADER
@@ -809,6 +809,14 @@
         <button onclick="setPattern('polkaBW')">Autograft Sheet</button>
         <canvas data-name="polkaBW" width="30" height="30"></canvas>
       </div>
+	  <div class="legend-item">
+  		<button onclick="setPattern('whiteStarOutline')">Autograft Spray</button>
+  		<canvas data-name="whiteStarOutline" width="30" height="30"></canvas>
+	  </div>
+	    <div class="legend-item">
+        <button onclick="setPattern('meshedSpray')">Meshed STSG + Autograft Spray</button>
+        <canvas data-name="meshedSpray" width="30" height="30"></canvas>
+      </div>
              
 </div> <!-- closes svg-layout -->
 
@@ -1250,6 +1258,120 @@ window.addEventListener("load", () => {
     p.fillRect(0, 0, c.width, c.height);
     return p.createPattern(c, "repeat");
   }
+  function whiteStarOutline() {
+  const size = 20;
+  const off = document.createElement("canvas");
+  off.width = size;
+  off.height = size;
+  const c = off.getContext("2d");
+
+  // ⭐ No background fill — stays transparent
+
+  // Draw a star outline
+  c.strokeStyle = "black";
+  c.lineWidth = 1.2;
+  c.beginPath();
+
+  const cx = size / 2;
+  const cy = size / 2;
+  const outer = 7;
+  const inner = 3;
+
+  for (let i = 0; i < 5; i++) {
+    const angleOuter = (Math.PI * 2 * i) / 5 - Math.PI / 2;
+    const angleInner = angleOuter + Math.PI / 5;
+
+    const xOuter = cx + outer * Math.cos(angleOuter);
+    const yOuter = cy + outer * Math.sin(angleOuter);
+    const xInner = cx + inner * Math.cos(angleInner);
+    const yInner = cy + inner * Math.sin(angleInner);
+
+    if (i === 0) c.moveTo(xOuter, yOuter);
+    else c.lineTo(xOuter, yOuter);
+
+    c.lineTo(xInner, yInner);
+  }
+
+  c.closePath();
+  c.stroke();
+
+  return c.createPattern(off, "repeat");
+}
+  
+  function meshedSpray() {
+  const size = 20;
+  const cell = 10;
+  const c = document.createElement("canvas");
+  c.width = size;
+  c.height = size;
+  const p = c.getContext("2d");
+
+  // --- PASS 1: Draw full dark grid ---
+  p.strokeStyle = "black";
+  p.lineWidth = 1;
+
+  for (let i = 0; i <= size; i += cell) {
+    // vertical
+    p.beginPath();
+    p.moveTo(i, 0);
+    p.lineTo(i, size);
+    p.stroke();
+
+    // horizontal
+    p.beginPath();
+    p.moveTo(0, i);
+    p.lineTo(size, i);
+    p.stroke();
+  }
+
+  // --- PASS 2: ERASE the two center lines so they can be faint ---
+  p.globalCompositeOperation = "destination-out";
+  p.lineWidth = 2; // slightly thicker to fully clear the dark line
+
+  // erase vertical center line
+  p.beginPath();
+  p.moveTo(size / 2, 0);
+  p.lineTo(size / 2, size);
+  p.stroke();
+
+  // erase horizontal center line
+  p.beginPath();
+  p.moveTo(0, size / 2);
+  p.lineTo(size, size / 2);
+  p.stroke();
+
+  // restore normal drawing mode
+  p.globalCompositeOperation = "source-over";
+
+  // --- PASS 3: Draw faint center lines ---
+  p.strokeStyle = "rgba(0,0,0,0.35)";
+  p.lineWidth = 1;
+
+  // faint vertical
+  p.beginPath();
+  p.moveTo(size / 2, 0);
+  p.lineTo(size / 2, size);
+  p.stroke();
+
+  // faint horizontal
+  p.beginPath();
+  p.moveTo(0, size / 2);
+  p.lineTo(size, size / 2);
+  p.stroke();
+
+  // --- PASS 4: Draw clean black S ---
+  p.font = "bold 10px Arial";
+  p.textAlign = "center";
+  p.textBaseline = "middle";
+  p.fillStyle = "black";
+
+  p.fillText("S", size / 2, size / 2);
+
+  return p.createPattern(c, "repeat");
+}
+
+
+
 
   const patterns = {
     stripes: stripe("black"),
@@ -1266,7 +1388,9 @@ window.addEventListener("load", () => {
     starsBlack: starsBlack(),
     starsWhite: starsWhite(),
     starBW: starBW(),
-    polkaBW: polkaBW()
+    polkaBW: polkaBW(),
+	whiteStarOutline: whiteStarOutline(),
+	meshedSpray: meshedSpray()
   };
 
   const prettyNames = {
@@ -1284,7 +1408,9 @@ window.addEventListener("load", () => {
     starsBlack: "Autograft Meshed",
     starsWhite: "Autograft ASCS Alone",
     starBW: "Autograft STSG + ASCS",
-    polkaBW: "Autograft Sheet"
+    polkaBW: "Autograft Sheet",
+	whiteStarOutline: "Autograft Spray",
+	meshedSpray: "Meshed STSG + Autograft Spray"
   };
 
   // Pattern selection
@@ -1615,4 +1741,7 @@ updateFloatingButton();
 
 </body>
 </html>
+
+
+
 
