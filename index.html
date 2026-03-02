@@ -402,6 +402,8 @@
 <div style="display:flex; gap:10px; margin-bottom:10px;">
 <button id="modeToggle">Switch to Select Mode</button>
 <button id="savePdfBtn">Save as PDF</button>
+<button id="savePngBtn">Download PNG</button>
+<button id="copyPngBtn">Copy to Clipboard</button>
 </div>
 
 <div id="svg-layout">
@@ -833,9 +835,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
-/* -----------------------------------------
-   Overlay input text for PDF rendering
------------------------------------------ */
+// -----------------------------
+// Overlay input text for PDF
+// -----------------------------
 function prepareInputsForCanvas() {
   const wrapper = document.getElementById("pdf-wrapper");
   const inputs = document.querySelectorAll("input.line-input");
@@ -858,35 +860,29 @@ function cleanupInputOverlays() {
   document.querySelectorAll(".input-overlay").forEach(el => el.remove());
 }
 
-
-/* -----------------------------------------
-   TEMP FIX: Prevent canvas shifting in PDF
------------------------------------------ */
+// -----------------------------
+// TEMP FIX: Prevent canvas shifting in PDF
+// -----------------------------
 function prepareForPdf() {
   const container = document.getElementById("svg-container");
-
   container.dataset.origTransform = container.style.transform;
   container.dataset.origTransition = container.style.transition;
-
   container.style.transform = "none";
   container.style.transition = "none";
 }
 
 function restoreAfterPdf() {
   const container = document.getElementById("svg-container");
-
   container.style.transform = container.dataset.origTransform || "";
   container.style.transition = container.dataset.origTransition || "";
 }
 
-
-/* -----------------------------------------
-   WIDTH LOCKING FOR PDF EXPORT
------------------------------------------ */
+// -----------------------------
+// WIDTH LOCKING FOR PDF EXPORT
+// -----------------------------
 function lockPdfLayout() {
   const layout = document.getElementById("svg-layout");
   const legend = document.getElementById("legend");
-
   layout.classList.add("pdf-lock-width");
   legend.classList.add("legend-lock");
 }
@@ -894,23 +890,14 @@ function lockPdfLayout() {
 function unlockPdfLayout() {
   const layout = document.getElementById("svg-layout");
   const legend = document.getElementById("legend");
-
   layout.classList.remove("pdf-lock-width");
   legend.classList.remove("legend-lock");
 }
 
-
-/* -----------------------------------------
-   EXPORT TO PDF
------------------------------------------ */
-async function exportToPDF() {
-  console.log("Export button clicked");
-
-  document.querySelectorAll("input.line-input").forEach(el => {
-    el.classList.add("hide-for-pdf");
-  });
-  document.getElementById("resetZoomBtn").classList.add("hide-for-pdf");
-
+// -----------------------------
+// High-res canvas for export
+// -----------------------------
+async function renderHighResCanvas() {
   prepareInputsForCanvas();
   prepareForPdf();
 
@@ -933,8 +920,6 @@ async function exportToPDF() {
   svgContainer.classList.add("shrink-svg-for-pdf");
   svgContainer.classList.add("scale-up-for-pdf");
 
-
-  /* ⭐ Lock only the SVG layout + legend */
   lockPdfLayout();
 
   const canvas = await html2canvas(wrapper, {
@@ -942,7 +927,6 @@ async function exportToPDF() {
     useCORS: true
   });
 
-  /* ⭐ Unlock after capture */
   unlockPdfLayout();
 
   layout.style.display = layout.dataset.origDisplay || "";
@@ -956,7 +940,6 @@ async function exportToPDF() {
   svgContainer.classList.remove("shrink-svg-for-pdf");
   svgContainer.classList.remove("scale-up-for-pdf");
 
-
   restoreAfterPdf();
   cleanupInputOverlays();
 
@@ -964,6 +947,16 @@ async function exportToPDF() {
     el.classList.remove("hide-for-pdf");
   });
   document.getElementById("resetZoomBtn").classList.remove("hide-for-pdf");
+
+  return canvas;
+}
+
+// -----------------------------
+// EXPORT TO PDF
+// -----------------------------
+async function exportToPDF() {
+  const canvas = await renderHighResCanvas();
+  lastRenderedCanvas = canvas;
 
   const imgData = canvas.toDataURL("image/png");
   const { jsPDF } = window.jspdf;
@@ -974,10 +967,67 @@ async function exportToPDF() {
   const imgHeight = (canvas.height * usableWidth) / canvas.width;
 
   pdf.addImage(imgData, "PNG", 4, 10, usableWidth, imgHeight);
-  pdf.save("body-map.pdf");
+  pdf.save("hand-map.pdf");
 }
 
+// -----------------------------
+// Copy image to clipboard helper
+// -----------------------------
+async function copyImageToClipboard(dataUrl) {
+  try {
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    const item = new ClipboardItem({ [blob.type]: blob });
+    await navigator.clipboard.write([item]);
+  } catch (err) {
+    console.error("Clipboard copy failed:", err);
+  }
+}
+
+// -----------------------------
+// GLOBAL STATE
+// -----------------------------
+let lastRenderedCanvas = null;
+let allData = [];
+let polygons = [];
+let drawMode = true;
+let currentPattern = null;
+let drawing = false;
+let currentStroke = [];
+let selectedParts = [];
+let currentScale = 1;
+let lastScale = 1;
+
+// -----------------------------
+// EXPORT BUTTONS (PNG + COPY)
+// -----------------------------
+window.addEventListener("load", () => {
+
+  document.getElementById("savePdfBtn").addEventListener("click", exportToPDF);
+
+  // ⭐ Download PNG button — auto-render
+  document.getElementById("savePngBtn").addEventListener("click", async () => {
+    const canvas = await renderHighResCanvas();
+    lastRenderedCanvas = canvas;
+
+    const link = document.createElement("a");
+    link.download = "hand-map.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  });
+
+  // ⭐ Copy to Clipboard button — auto-render
+  document.getElementById("copyPngBtn").addEventListener("click", async () => {
+    const canvas = await renderHighResCanvas();
+    lastRenderedCanvas = canvas;
+
+    const dataUrl = canvas.toDataURL("image/png");
+    copyImageToClipboard(dataUrl);
+  });
+
+});
 </script>
+
 
 
 
@@ -1741,6 +1791,9 @@ updateFloatingButton();
 
 </body>
 </html>
+
+
+
 
 
 
