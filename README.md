@@ -29,7 +29,7 @@ The last list is possible functional implications from injuries to these differe
 The Functional Implications list is not exhaustive but rather general insight by the database authors based on locations of injuries. 
 The "Clear Selections" button will clear all selection of hand regions and corresponding information so the clinician can start over.
 
-Exporting the image and entire app screen requires clicking the "Save as PDF" button located directly above the hands image. Exporting as a PDF can be done at any point in the app use and can be done multiple times while the app is open. This app does not save any information. All information, including alphanumeric patient identifying information, is deleted upon closing the app. 
+Exporting the image and entire app screen requires clicking the "Save as PDF", "Download PNG", or "Copy to Clipboard" buttons located directly above the hands image. Unless otherwise specified, most downloaded images will be found in the download foler of your device. "Copy to Clipboard" will allow you to paste the high-quality PNG image into a document or image program. Exporting the image can be done at any point during app use and can be done multiple times while the app is open. This app does not save any information. All information, including alphanumeric patient identifying information, is deleted upon closing the app. 
 
 Special instructions for mobile use.
 This app can be used on all mobile devices such as smart phones and tablets.
